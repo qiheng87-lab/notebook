@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A local offline notebook app with pages, calendar, and audio">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Notebook">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Local Notebook</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%232196F3' width='100' height='100'/><text x='50' y='50' font-size='50' fill='white' text-anchor='middle' dominant-baseline='central'>📝</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Notes</h2>
+                <button class="toggle-btn" id="toggleBtn">☰</button>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="sidebar-nav">
+                <button class="nav-tab active" data-tab="pages" id="pagesTab">📝 Pages</button>
+                <button class="nav-tab" data-tab="calendar" id="calendarTab">📅 Calendar</button>
+                <button class="nav-tab" data-tab="audio" id="audioTab">🎵 Audio</button>
+            </div>
+
+            <!-- Pages Section -->
+            <div class="sidebar-content active" id="pagesContent">
+                <div class="pages-list" id="pagesList">
+                    <!-- Pages will be inserted here -->
+                </div>
+                
+                <button class="add-page-btn" id="addPageBtn">+ New Page</button>
+                
+                <!-- Export/Import Section -->
+                <div class="export-import-section">
+                    <button class="export-btn" id="exportBtn" title="Export locked pages">⬇ Export</button>
+                    <button class="import-btn" id="importBtn" title="Import locked pages">⬆ Import</button>
+                </div>
+            </div>
+
+        
+            <!-- Audio Section -->
+<div class="sidebar-content" id="audioContent">
+    <div class="audio-channels" id="audioChannels">
+        <!-- Audio channels will be inserted here -->
+    </div>
+    
+    <!-- YouTube Player Embedded in Sidebar -->
+    <div class="youtube-player-container" id="youtubePlayerContainer">
+        <iframe 
+            id="youtubePlayer" 
+            class="youtube-player-embed"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+        </iframe>
+    </div>
+</div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Pages View -->
+            <div class="view-container active" id="pagesView">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="format-buttons">
+                        <button class="format-btn" id="boldBtn" title="Bold (Ctrl+B)">
+                            <strong>B</strong>
+                        </button>
+                        <button class="format-btn" id="italicBtn" title="Italic (Ctrl+I)">
+                            <em>I</em>
+                        </button>
+                        <button class="format-btn" id="underlineBtn" title="Underline (Ctrl+U)">
+                            <u>U</u>
+                        </button>
+                    </div>
+
+                    <div class="page-controls">
+                        <button class="lock-btn" id="lockBtn" title="Lock/unlock this page">
+                            <span id="lockIcon">🔓</span> <span id="lockText">Lock</span>
+                        </button>
+                    </div>
+
+                    <div class="zoom-controls">
+                        <button id="zoomOut" title="Decrease font size">−</button>
+                        <span id="zoomLevel">100%</span>
+                        <button id="zoomIn" title="Increase font size">+</button>
+                    </div>
+                </div>
+
+                <!-- Page Title -->
+                <input 
+                    type="text" 
+                    class="page-title" 
+                    id="pageTitle" 
+                    placeholder="Enter page title..." 
+                    maxlength="100"
+                >
+
+                <!-- Editor Container with Border -->
+                <div class="editor-container">
+                    <div class="editor" id="editor" contenteditable="true"></div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="view-container" id="calendarView">
+                <div class="calendar-view-header">
+                    <button id="prevMonthLarge" class="month-nav-large">← Previous</button>
+                    <h2 id="currentMonthLarge"></h2>
+                    <button id="nextMonthLarge" class="month-nav-large">Next →</button>
+                </div>
+                <div class="calendar-view-container">
+                    <div class="calendar-grid-large" id="calendarGridLarge"></div>
+                </div>
+                <div class="back-to-pages-btn-container">
+                    <button id="backToPagesBtn" class="back-to-pages-btn">← Back to Pages</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Audio Player Bar at Bottom -->
+    <div class="audio-player-bar" id="audioPlayerBar">
+        <div class="audio-player-content">
+            <div class="now-playing" id="nowPlaying">No channel selected</div>
+            <div class="audio-controls">
+                <button id="playPauseBtn" class="audio-btn" title="Play/Pause">
+                    <span class="play-icon">▶</span>
+                    <span class="pause-icon" style="display: none;">⏸</span>
+                </button>
+                <div class="progress-bar-container">
+                    <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0">
+                    <span id="currentTime" class="time-display">0:00</span>
+                    <span id="duration" class="time-display">0:00</span>
+                </div>
+                <div class="volume-display">
+                    <span class="volume-icon">🔊</span>
+                    <input type="range" id="volumeControl" class="volume-control" min="0" max="100" value="70">
+                    <span id="volumePercent" class="volume-percent">70%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden iframe for YouTube (audio only) -->
+    <iframe id="youtubePlayer" style="display: none;"></iframe>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="app.js"></script>
+</body>
+</html>
