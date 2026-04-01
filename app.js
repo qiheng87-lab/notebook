@@ -431,28 +431,42 @@ class NotebookApp {
     }
 
     highlightText() {
-        const selection = window.getSelection();
-        
-        if (!selection.rangeCount || selection.isCollapsed) {
-            return;
-        }
+    const selection = window.getSelection();
+    
+    if (!selection.rangeCount || selection.isCollapsed) {
+        return;
+    }
 
-        const range = selection.getRangeAt(0);
-        const span = document.createElement('mark');
-        span.style.backgroundColor = '#FFFF00';
+    const range = selection.getRangeAt(0);
+    const span = range.commonAncestorContainer.parentElement;
+
+    // Check if the selected text is already highlighted
+    if (span && span.tagName === 'MARK') {
+        // Remove highlight
+        const parent = span.parentNode;
+        while (span.firstChild) {
+            parent.insertBefore(span.firstChild, span);
+        }
+        parent.removeChild(span);
+    } else {
+        // Add highlight
+        const mark = document.createElement('mark');
+        mark.style.backgroundColor = '#FFFF00';
         
         try {
-            range.surroundContents(span);
+            range.surroundContents(mark);
         } catch (e) {
             const fragment = range.extractContents();
-            span.appendChild(fragment);
-            range.insertNode(span);
+            mark.appendChild(fragment);
+            range.insertNode(mark);
         }
-
-        if (this.editor) this.editor.focus();
-        this.savePage();
-        this.updateActiveButtons();
     }
+
+    if (this.editor) this.editor.focus();
+    this.savePage();
+    this.updateActiveButtons();
+    }
+
 
     updateActiveButtons() {
         if (this.boldBtn) {
