@@ -3,25 +3,25 @@ const BUILT_IN_TEMPLATES = [];
 
 // YouTube Audio Channels Configuration
 const YOUTUBE_CHANNELS = [
-    {
-        name: 'Test Video 1',
+        {
+        name: 'Yellow Cherry Jam',
         icon: '🎵',
-        videoId: 'dQw4w9WgXcQ'
+        videoId: 'JYozwaAbAvc'
     },
     {
-        name: 'Test Video 2',
+        name: 'Frieren x Jazz',
         icon: '🎶',
-        videoId: 'dQw4w9WgXcQ'
+        videoId: 'teWgiwkC6hM'
     },
     {
-        name: 'Test Video 3',
+        name: 'Nature Rain Piano',
         icon: '🎼',
-        videoId: 'dQw4w9WgXcQ'
+        videoId: 't0VMo8x-jj8'
     },
     {
-        name: 'Test Video 4',
+        name: 'Afloat in Time',
         icon: '🎧',
-        videoId: 'dQw4w9WgXcQ'
+        videoId: '16Lx917STJY'
     }
 ];
 
