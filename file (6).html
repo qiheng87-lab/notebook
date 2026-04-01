@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A local offline notebook app with pages, calendar, and audio">
+    <meta name="theme-color" content="#2196F3">
+    <title>Local Notebook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%232196F3' width='100' height='100'/><text x='50' y='50' font-size='50' fill='white' text-anchor='middle' dominant-baseline='central'>📝</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Notes</h2>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="sidebar-nav">
+                <button class="nav-tab active" data-tab="pages" id="pagesTab">📝 Pages</button>
+                <button class="nav-tab" data-tab="calendar" id="calendarTab">📅 Calendar</button>
+                <button class="nav-tab" data-tab="audio" id="audioTab">🎵 Audio</button>
+            </div>
+
+            <!-- Pages Section -->
+            <div class="sidebar-content active" id="pagesContent">
+                <div class="pages-list" id="pagesList">
+                    <!-- Pages will be inserted here -->
+                </div>
+                
+                <button class="add-page-btn" id="addPageBtn">+ New Page</button>
+            </div>
+
+            <!-- Audio Section -->
+            <div class="sidebar-content" id="audioContent">
+                <div class="audio-channels" id="audioChannels">
+                    <!-- Audio channels will be inserted here -->
+                </div>
+                
+                <!-- YouTube Player Embedded in Sidebar -->
+                <div class="youtube-player-container" id="youtubePlayerContainer">
+                    <div id="youtubePlayer" class="youtube-player-embed"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Pages View -->
+            <div class="view-container active" id="pagesView">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="format-buttons">
+                        <button class="format-btn" id="boldBtn" title="Bold (Ctrl+B)">
+                            <strong>B</strong>
+                        </button>
+                        <button class="format-btn" id="italicBtn" title="Italic (Ctrl+I)">
+                            <em>I</em>
+                        </button>
+                        <button class="format-btn" id="underlineBtn" title="Underline (Ctrl+U)">
+                            <u>U</u>
+                        </button>
+                        <button class="format-btn" id="highlightBtn" title="Highlight (Ctrl+H)">
+                            🖍️
+                        </button>
+                    </div>
+
+                    <div class="page-controls">
+                        <button class="lock-btn" id="lockBtn" title="Lock/unlock this page">
+                            <span id="lockIcon">🔓</span> <span id="lockText">Lock</span>
+                        </button>
+                        <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle fullscreen">
+                            ⛶
+                        </button>
+                    </div>
+
+                    <div class="zoom-controls">
+                        <button id="zoomOut" title="Decrease font size">−</button>
+                        <span id="zoomLevel">100%</span>
+                        <button id="zoomIn" title="Increase font size">+</button>
+                    </div>
+                </div>
+
+                <!-- Page Title -->
+                <input 
+                    type="text" 
+                    class="page-title" 
+                    id="pageTitle" 
+                    placeholder="Enter page title..." 
+                    maxlength="100"
+                >
+
+                <!-- Editor Container with Border -->
+                <div class="editor-container">
+                    <div class="editor" id="editor" contenteditable="true"></div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="view-container" id="calendarView">
+                <div class="calendar-view-header">
+                    <button id="prevMonthLarge" class="month-nav-large">← Previous</button>
+                    <h2 id="currentMonthLarge"></h2>
+                    <button id="nextMonthLarge" class="month-nav-large">Next →</button>
+                </div>
+                <div class="calendar-view-container">
+                    <div class="calendar-grid-large" id="calendarGridLarge"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Pomodoro Timer Bar at Bottom -->
+    <div class="pomodoro-timer-bar" id="pomodoroTimerBar">
+        <div class="pomodoro-content">
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <div class="timer-controls">
+                <button id="startBtn" class="timer-btn" title="Start">▶</button>
+                <button id="pauseBtn" class="timer-btn" title="Pause" style="display: none;">⏸</button>
+                <button id="resetBtn" class="timer-btn" title="Reset">↻</button>
+            </div>
+            <div class="timer-info">
+                <span id="timerStatus">Work Time</span>
+                <div class="timer-progress-bar">
+                    <div id="timerProgress" class="timer-progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube IFrame API -->
+    <script>
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            console.log('YouTube IFrame API is ready');
+        }
+    </script>
+
+    <script src="app.js"></script>
+</body>
+</html>
