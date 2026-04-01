@@ -27,8 +27,8 @@ const YOUTUBE_CHANNELS = [
 
 // Pomodoro Timer Settings
 const POMODORO_SETTINGS = {
-    workDuration: 25 * 60, // 25 minutes in seconds
-    breakDuration: 5 * 60, // 5 minutes in seconds
+    workDuration: 25 * 60,
+    breakDuration: 5 * 60,
 };
 
 // Notebook App - Main Logic
@@ -43,163 +43,143 @@ class NotebookApp {
         this.basePageTitleFontSize = 20;
         this.storageKey = 'notebook_data';
         
-        // Calendar properties
         this.currentDate = new Date();
-        
-        // Audio properties
         this.youtubePlayer = null;
         this.currentChannelIndex = -1;
         this.isPlaying = false;
         
-        // Pomodoro properties
         this.pomodoroInterval = null;
         this.timeRemaining = POMODORO_SETTINGS.workDuration;
         this.totalTime = POMODORO_SETTINGS.workDuration;
         this.isWorkTime = true;
         this.isTimerRunning = false;
         
-        // Fullscreen properties
         this.isFullscreen = false;
         
         this.initElements();
-        console.log('Elements initialized');
-        
         this.loadData();
-        console.log('Data loaded, pages:', this.pages.length);
-        
         this.attachEventListeners();
-        console.log('Event listeners attached');
-        
-        // Initialize calendar view
         this.renderCalendarView();
-        
-        // Initialize audio channels
         this.renderAudioChannels();
-        
-        // Initialize pomodoro timer display
         this.updateTimerDisplay();
         
-        // Create first page if none exist
         if (this.pages.length === 0) {
             this.addPage();
-            console.log('First page created');
         } else {
             this.loadPage(this.pages[0].id);
-            console.log('First page loaded');
         }
     }
 
     initElements() {
-        // Navigation tabs
-        this.pagesTab = document.getElementById('pagesTab');
-        this.calendarTab = document.getElementById('calendarTab');
-        this.audioTab = document.getElementById('audioTab');
-        this.pagesContent = document.getElementById('pagesContent');
-        this.audioContent = document.getElementById('audioContent');
-        this.pagesView = document.getElementById('pagesView');
-        this.calendarView = document.getElementById('calendarView');
+        const getElement = (id) => {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.warn(`Element with id "${id}" not found`);
+            }
+            return element;
+        };
 
-        // Pages
-        this.sidebar = document.getElementById('sidebar');
-        this.pagesList = document.getElementById('pagesList');
-        this.addPageBtn = document.getElementById('addPageBtn');
-        this.editor = document.getElementById('editor');
-        this.pageTitle = document.getElementById('pageTitle');
-        this.boldBtn = document.getElementById('boldBtn');
-        this.italicBtn = document.getElementById('italicBtn');
-        this.underlineBtn = document.getElementById('underlineBtn');
-        this.highlightBtn = document.getElementById('highlightBtn');
-        this.lockBtn = document.getElementById('lockBtn');
-        this.lockIcon = document.getElementById('lockIcon');
-        this.lockText = document.getElementById('lockText');
-        this.fullscreenBtn = document.getElementById('fullscreenBtn');
-        this.zoomIn = document.getElementById('zoomIn');
-        this.zoomOut = document.getElementById('zoomOut');
-        this.zoomLevel = document.getElementById('zoomLevel');
-        this.toolbar = document.querySelector('.toolbar');
-        this.editorContainer = document.querySelector('.editor-container');
-        this.mainContent = document.getElementById('mainContent');
+        const getQuerySelector = (selector) => {
+            const element = document.querySelector(selector);
+            if (!element) {
+                console.warn(`Element with selector "${selector}" not found`);
+            }
+            return element;
+        };
+
+        this.pagesTab = getElement('pagesTab');
+        this.calendarTab = getElement('calendarTab');
+        this.audioTab = getElement('audioTab');
+        this.pagesContent = getElement('pagesContent');
+        this.audioContent = getElement('audioContent');
+        this.pagesView = getElement('pagesView');
+        this.calendarView = getElement('calendarView');
+
+        this.sidebar = getElement('sidebar');
+        this.pagesList = getElement('pagesList');
+        this.addPageBtn = getElement('addPageBtn');
+        this.editor = getElement('editor');
+        this.pageTitle = getElement('pageTitle');
+        this.boldBtn = getElement('boldBtn');
+        this.italicBtn = getElement('italicBtn');
+        this.underlineBtn = getElement('underlineBtn');
+        this.highlightBtn = getElement('highlightBtn');
+        this.lockBtn = getElement('lockBtn');
+        this.lockIcon = getElement('lockIcon');
+        this.lockText = getElement('lockText');
+        this.fullscreenBtn = getElement('fullscreenBtn');
+        this.zoomIn = getElement('zoomIn');
+        this.zoomOut = getElement('zoomOut');
+        this.zoomLevelElement = getElement('zoomLevel');
+        this.toolbar = getQuerySelector('.toolbar');
+        this.editorContainer = getQuerySelector('.editor-container');
+        this.mainContent = getElement('mainContent');
         
-        // Calendar view
-        this.calendarGridLarge = document.getElementById('calendarGridLarge');
-        this.currentMonthLarge = document.getElementById('currentMonthLarge');
-        this.prevMonthLarge = document.getElementById('prevMonthLarge');
-        this.nextMonthLarge = document.getElementById('nextMonthLarge');
+        this.calendarGridLarge = getElement('calendarGridLarge');
+        this.currentMonthLarge = getElement('currentMonthLarge');
+        this.prevMonthLarge = getElement('prevMonthLarge');
+        this.nextMonthLarge = getElement('nextMonthLarge');
         
-        // Audio player elements
-        this.audioChannels = document.getElementById('audioChannels');
+        this.audioChannels = getElement('audioChannels');
         
-        // Pomodoro timer elements
-        this.pomodoroTimerBar = document.getElementById('pomodoroTimerBar');
-        this.timerDisplay = document.getElementById('timerDisplay');
-        this.startBtn = document.getElementById('startBtn');
-        this.pauseBtn = document.getElementById('pauseBtn');
-        this.resetBtn = document.getElementById('resetBtn');
-        this.timerStatus = document.getElementById('timerStatus');
-        this.timerProgress = document.getElementById('timerProgress');
+        this.pomodoroTimerBar = getElement('pomodoroTimerBar');
+        this.timerDisplay = getElement('timerDisplay');
+        this.startBtn = getElement('startBtn');
+        this.pauseBtn = getElement('pauseBtn');
+        this.resetBtn = getElement('resetBtn');
+        this.timerStatus = getElement('timerStatus');
+        this.timerProgress = getElement('timerProgress');
     }
 
     attachEventListeners() {
-        // Navigation tabs
-        this.pagesTab.addEventListener('click', () => this.switchView('pages'));
-        this.calendarTab.addEventListener('click', () => this.switchView('calendar'));
-        this.audioTab.addEventListener('click', () => this.switchView('audio'));
+        const addListener = (element, event, callback) => {
+            if (element) {
+                element.addEventListener(event, callback);
+            }
+        };
 
-        // Add page
-        this.addPageBtn.addEventListener('click', () => {
-            console.log('Add page clicked');
-            this.addPage();
-        });
+        addListener(this.pagesTab, 'click', () => this.switchView('pages'));
+        addListener(this.calendarTab, 'click', () => this.switchView('calendar'));
+        addListener(this.audioTab, 'click', () => this.switchView('audio'));
 
-        // Format buttons
-        this.boldBtn.addEventListener('click', (e) => {
+        addListener(this.addPageBtn, 'click', () => this.addPage());
+
+        addListener(this.boldBtn, 'click', (e) => {
             e.preventDefault();
             this.formatText('bold');
         });
         
-        this.italicBtn.addEventListener('click', (e) => {
+        addListener(this.italicBtn, 'click', (e) => {
             e.preventDefault();
             this.formatText('italic');
         });
         
-        this.underlineBtn.addEventListener('click', (e) => {
+        addListener(this.underlineBtn, 'click', (e) => {
             e.preventDefault();
             this.formatText('underline');
         });
 
-        this.highlightBtn.addEventListener('click', (e) => {
+        addListener(this.highlightBtn, 'click', (e) => {
             e.preventDefault();
             this.highlightText();
         });
 
-        // Lock button
-        this.lockBtn.addEventListener('click', () => {
-            this.togglePageLock();
-        });
+        addListener(this.lockBtn, 'click', () => this.togglePageLock());
+        addListener(this.fullscreenBtn, 'click', () => this.toggleFullscreen());
 
-        // Fullscreen button
-        this.fullscreenBtn.addEventListener('click', () => {
-            this.toggleFullscreen();
-        });
+        addListener(this.editor, 'input', () => this.savePage());
+        addListener(this.pageTitle, 'input', () => this.savePage());
 
-        // Editor events
-        this.editor.addEventListener('input', () => this.savePage());
-        this.pageTitle.addEventListener('input', () => this.savePage());
+        addListener(this.zoomIn, 'click', () => this.zoom(10));
+        addListener(this.zoomOut, 'click', () => this.zoom(-10));
 
-        // Zoom controls
-        this.zoomIn.addEventListener('click', () => this.zoom(10));
-        this.zoomOut.addEventListener('click', () => this.zoom(-10));
+        addListener(this.prevMonthLarge, 'click', () => this.previousMonth());
+        addListener(this.nextMonthLarge, 'click', () => this.nextMonth());
 
-        // Calendar view navigation
-        this.prevMonthLarge.addEventListener('click', () => this.previousMonth());
-        this.nextMonthLarge.addEventListener('click', () => this.nextMonth());
+        addListener(this.startBtn, 'click', () => this.startTimer());
+        addListener(this.pauseBtn, 'click', () => this.pauseTimer());
+        addListener(this.resetBtn, 'click', () => this.resetTimer());
 
-        // Pomodoro timer controls
-        this.startBtn.addEventListener('click', () => this.startTimer());
-        this.pauseBtn.addEventListener('click', () => this.pauseTimer());
-        this.resetBtn.addEventListener('click', () => this.resetTimer());
-
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'b') {
@@ -221,42 +201,36 @@ class NotebookApp {
             }
         });
 
-        // Update active button on selection change
         document.addEventListener('selectionchange', () => {
             this.updateActiveButtons();
         });
     }
 
     switchView(view) {
-        console.log('Switching to view:', view);
-
-        // Update tabs
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.classList.remove('active');
         });
 
-        // Hide all sidebar content
         document.querySelectorAll('.sidebar-content').forEach(content => {
             content.classList.remove('active');
         });
 
-        // Hide all view containers
         document.querySelectorAll('.view-container').forEach(container => {
             container.classList.remove('active');
         });
 
         if (view === 'pages') {
-            this.pagesTab.classList.add('active');
-            this.pagesContent.classList.add('active');
-            this.pagesView.classList.add('active');
+            if (this.pagesTab) this.pagesTab.classList.add('active');
+            if (this.pagesContent) this.pagesContent.classList.add('active');
+            if (this.pagesView) this.pagesView.classList.add('active');
         } else if (view === 'calendar') {
-            this.calendarTab.classList.add('active');
-            this.pagesView.classList.add('active');
-            this.calendarView.classList.add('active');
+            if (this.calendarTab) this.calendarTab.classList.add('active');
+            if (this.pagesView) this.pagesView.classList.add('active');
+            if (this.calendarView) this.calendarView.classList.add('active');
         } else if (view === 'audio') {
-            this.audioTab.classList.add('active');
-            this.audioContent.classList.add('active');
-            this.pagesView.classList.add('active');
+            if (this.audioTab) this.audioTab.classList.add('active');
+            if (this.audioContent) this.audioContent.classList.add('active');
+            if (this.pagesView) this.pagesView.classList.add('active');
         }
     }
 
@@ -281,8 +255,9 @@ class NotebookApp {
         if (!page) return;
 
         this.currentPageId = pageId;
-        this.pageTitle.value = page.title;
-        this.editor.innerHTML = page.content;
+        
+        if (this.pageTitle) this.pageTitle.value = page.title;
+        if (this.editor) this.editor.innerHTML = page.content;
         
         this.updateLockUI();
         this.renderPagesList();
@@ -319,7 +294,6 @@ class NotebookApp {
         const page = this.pages.find(p => p.id === this.currentPageId);
         if (page) {
             page.locked = !page.locked;
-            console.log(`Page locked: ${page.locked}`);
             this.savePage();
             this.updateLockUI();
             this.renderPagesList();
@@ -334,40 +308,39 @@ class NotebookApp {
 
         const isLocked = page.locked;
         
-        this.lockBtn.classList.toggle('locked', isLocked);
-        this.lockIcon.textContent = isLocked ? '🔒' : '🔓';
-        this.lockText.textContent = isLocked ? 'Unlock' : 'Lock';
+        if (this.lockBtn) this.lockBtn.classList.toggle('locked', isLocked);
+        if (this.lockIcon) this.lockIcon.textContent = isLocked ? '🔒' : '🔓';
+        if (this.lockText) this.lockText.textContent = isLocked ? 'Unlock' : 'Lock';
         
-        this.editor.classList.toggle('locked', isLocked);
-        this.editor.contentEditable = !isLocked;
-        this.pageTitle.disabled = isLocked;
+        if (this.editor) {
+            this.editor.classList.toggle('locked', isLocked);
+            this.editor.contentEditable = !isLocked;
+        }
+        if (this.pageTitle) this.pageTitle.disabled = isLocked;
     }
 
     toggleFullscreen() {
         this.isFullscreen = !this.isFullscreen;
-        console.log('Fullscreen toggled:', this.isFullscreen);
 
         if (this.isFullscreen) {
-            // Enter fullscreen mode
-            this.toolbar.classList.add('fullscreen-mode');
-            this.pageTitle.classList.add('fullscreen-mode');
-            this.editorContainer.classList.add('fullscreen');
-            this.mainContent.classList.add('fullscreen-mode');
-            this.fullscreenBtn.classList.add('active');
-            this.sidebar.style.display = 'none';
+            if (this.toolbar) this.toolbar.classList.add('fullscreen-mode');
+            if (this.pageTitle) this.pageTitle.classList.add('fullscreen-mode');
+            if (this.editorContainer) this.editorContainer.classList.add('fullscreen');
+            if (this.mainContent) this.mainContent.classList.add('fullscreen-mode');
+            if (this.fullscreenBtn) this.fullscreenBtn.classList.add('active');
+            if (this.sidebar) this.sidebar.style.display = 'none';
             document.body.style.overflow = 'hidden';
         } else {
-            // Exit fullscreen mode
-            this.toolbar.classList.remove('fullscreen-mode');
-            this.pageTitle.classList.remove('fullscreen-mode');
-            this.editorContainer.classList.remove('fullscreen');
-            this.mainContent.classList.remove('fullscreen-mode');
-            this.fullscreenBtn.classList.remove('active');
-            this.sidebar.style.display = 'flex';
+            if (this.toolbar) this.toolbar.classList.remove('fullscreen-mode');
+            if (this.pageTitle) this.pageTitle.classList.remove('fullscreen-mode');
+            if (this.editorContainer) this.editorContainer.classList.remove('fullscreen');
+            if (this.mainContent) this.mainContent.classList.remove('fullscreen-mode');
+            if (this.fullscreenBtn) this.fullscreenBtn.classList.remove('active');
+            if (this.sidebar) this.sidebar.style.display = 'flex';
             document.body.style.overflow = 'auto';
         }
 
-        this.editor.focus();
+        if (this.editor) this.editor.focus();
     }
 
     savePage() {
@@ -375,8 +348,8 @@ class NotebookApp {
 
         const page = this.pages.find(p => p.id === this.currentPageId);
         if (page && !page.locked) {
-            page.title = this.pageTitle.value || 'Untitled';
-            page.content = this.editor.innerHTML;
+            if (this.pageTitle) page.title = this.pageTitle.value || 'Untitled';
+            if (this.editor) page.content = this.editor.innerHTML;
         }
 
         localStorage.setItem(this.storageKey, JSON.stringify(this.pages));
@@ -393,7 +366,6 @@ class NotebookApp {
             }
         }
 
-        // Add built-in templates if they don't exist
         this.addBuiltInTemplates();
     }
 
@@ -402,12 +374,13 @@ class NotebookApp {
             const exists = this.pages.some(p => p.id === template.id);
             if (!exists) {
                 this.pages.unshift(template);
-                console.log(`Added built-in template: ${template.title}`);
             }
         });
     }
 
     renderPagesList() {
+        if (!this.pagesList) return;
+        
         this.pagesList.innerHTML = '';
         
         this.pages.forEach(page => {
@@ -451,19 +424,16 @@ class NotebookApp {
     }
 
     formatText(command) {
-        console.log('formatText called with:', command);
         document.execCommand(command, false, null);
-        this.editor.focus();
+        if (this.editor) this.editor.focus();
         this.savePage();
         this.updateActiveButtons();
     }
 
     highlightText() {
-        console.log('highlightText called');
         const selection = window.getSelection();
         
         if (!selection.rangeCount || selection.isCollapsed) {
-            console.log('No text selected');
             return;
         }
 
@@ -474,25 +444,29 @@ class NotebookApp {
         try {
             range.surroundContents(span);
         } catch (e) {
-            console.log('Complex selection, using alternative method');
             const fragment = range.extractContents();
             span.appendChild(fragment);
             range.insertNode(span);
         }
 
-        this.editor.focus();
+        if (this.editor) this.editor.focus();
         this.savePage();
         this.updateActiveButtons();
     }
 
     updateActiveButtons() {
-        this.boldBtn.classList.toggle('active', document.queryCommandState('bold'));
-        this.italicBtn.classList.toggle('active', document.queryCommandState('italic'));
-        this.underlineBtn.classList.toggle('active', document.queryCommandState('underline'));
+        if (this.boldBtn) {
+            this.boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+        }
+        if (this.italicBtn) {
+            this.italicBtn.classList.toggle('active', document.queryCommandState('italic'));
+        }
+        if (this.underlineBtn) {
+            this.underlineBtn.classList.toggle('active', document.queryCommandState('underline'));
+        }
         
-        // Check if current selection is highlighted
         const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
+        if (selection.rangeCount > 0 && this.highlightBtn) {
             const range = selection.getRangeAt(0);
             const parent = range.commonAncestorContainer.parentElement;
             this.highlightBtn.classList.toggle('active', parent && parent.tagName === 'MARK');
@@ -505,12 +479,17 @@ class NotebookApp {
         
         const zoomFactor = this.zoomLevel / 100;
         
-        this.editor.style.fontSize = `${this.baseEditorFontSize * zoomFactor}px`;
-        this.pageTitle.style.fontSize = `${this.basePageTitleFontSize * zoomFactor}px`;
-        document.getElementById('zoomLevel').textContent = `${this.zoomLevel}%`;
+        if (this.editor) {
+            this.editor.style.fontSize = `${this.baseEditorFontSize * zoomFactor}px`;
+        }
+        if (this.pageTitle) {
+            this.pageTitle.style.fontSize = `${this.basePageTitleFontSize * zoomFactor}px`;
+        }
+        if (this.zoomLevelElement) {
+            this.zoomLevelElement.textContent = `${this.zoomLevel}%`;
+        }
     }
 
-    // Calendar functions
     renderCalendarView() {
         this.updateCalendarHeaderLarge();
         this.renderCalendarGridLarge();
@@ -518,13 +497,16 @@ class NotebookApp {
 
     updateCalendarHeaderLarge() {
         const monthYear = this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-        this.currentMonthLarge.textContent = monthYear;
+        if (this.currentMonthLarge) {
+            this.currentMonthLarge.textContent = monthYear;
+        }
     }
 
     renderCalendarGridLarge() {
+        if (!this.calendarGridLarge) return;
+        
         this.calendarGridLarge.innerHTML = '';
         
-        // Day headers
         const dayHeaders = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         dayHeaders.forEach(day => {
             const dayHeader = document.createElement('div');
@@ -536,19 +518,16 @@ class NotebookApp {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
         
-        // Get first day of month and number of days
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-        // Previous month's days
         for (let i = firstDay - 1; i >= 0; i--) {
             const day = daysInPrevMonth - i;
             const dayElement = this.createDayElementLarge(day, true);
             this.calendarGridLarge.appendChild(dayElement);
         }
 
-        // Current month's days
         const today = new Date();
         for (let day = 1; day <= daysInMonth; day++) {
             const isToday = day === today.getDate() && 
@@ -558,9 +537,8 @@ class NotebookApp {
             this.calendarGridLarge.appendChild(dayElement);
         }
 
-        // Next month's days
         const totalCells = this.calendarGridLarge.children.length;
-        const remainingCells = 42 - totalCells; // 6 rows × 7 days
+        const remainingCells = 42 - totalCells;
         for (let day = 1; day <= remainingCells; day++) {
             const dayElement = this.createDayElementLarge(day, true);
             this.calendarGridLarge.appendChild(dayElement);
@@ -584,18 +562,17 @@ class NotebookApp {
 
     previousMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-        console.log('Previous month:', this.currentDate);
         this.renderCalendarView();
     }
 
     nextMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-        console.log('Next month:', this.currentDate);
         this.renderCalendarView();
     }
 
-    // Audio functions
     renderAudioChannels() {
+        if (!this.audioChannels) return;
+        
         this.audioChannels.innerHTML = '';
 
         YOUTUBE_CHANNELS.forEach((channel, index) => {
@@ -619,8 +596,6 @@ class NotebookApp {
     }
 
     loadAudioChannel(index) {
-        console.log('Loading audio channel:', index);
-        
         if (index < 0 || index >= YOUTUBE_CHANNELS.length) {
             console.error('Invalid channel index');
             return;
@@ -629,29 +604,19 @@ class NotebookApp {
         this.currentChannelIndex = index;
         const channel = YOUTUBE_CHANNELS[index];
 
-        // Update UI
         this.renderAudioChannels();
-
-        // Load YouTube video using IFrame API
         this.loadYoutubePlayer(channel.videoId);
     }
 
     loadYoutubePlayer(videoId) {
-        console.log('Loading YouTube video:', videoId);
-
-        // Check if YouTube API is ready
         if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-            console.log('YouTube API not ready, retrying...');
             setTimeout(() => this.loadYoutubePlayer(videoId), 500);
             return;
         }
 
-        // If player already exists, load new video
         if (this.youtubePlayer && typeof this.youtubePlayer.loadVideoById === 'function') {
             this.youtubePlayer.loadVideoById(videoId);
-            console.log('Loaded new video:', videoId);
         } else {
-            // Create new player
             this.youtubePlayer = new YT.Player('youtubePlayer', {
                 height: '200',
                 width: '100%',
@@ -672,7 +637,6 @@ class NotebookApp {
                     'playsinline': 1
                 }
             });
-            console.log('YouTube player created');
         }
     }
 
@@ -710,13 +674,12 @@ class NotebookApp {
         alert('YouTube Error ' + event.data + ': ' + errorMessage);
     }
 
-    // Pomodoro Timer functions
     startTimer() {
         if (this.isTimerRunning) return;
 
         this.isTimerRunning = true;
-        this.startBtn.style.display = 'none';
-        this.pauseBtn.style.display = 'flex';
+        if (this.startBtn) this.startBtn.style.display = 'none';
+        if (this.pauseBtn) this.pauseBtn.style.display = 'flex';
 
         this.pomodoroInterval = setInterval(() => {
             this.timeRemaining--;
@@ -731,8 +694,8 @@ class NotebookApp {
 
     pauseTimer() {
         this.isTimerRunning = false;
-        this.pauseBtn.style.display = 'none';
-        this.startBtn.style.display = 'flex';
+        if (this.pauseBtn) this.pauseBtn.style.display = 'none';
+        if (this.startBtn) this.startBtn.style.display = 'flex';
 
         if (this.pomodoroInterval) {
             clearInterval(this.pomodoroInterval);
@@ -752,13 +715,11 @@ class NotebookApp {
         this.pauseTimer();
 
         if (this.isWorkTime) {
-            // Switch to break time
             this.isWorkTime = false;
             this.timeRemaining = POMODORO_SETTINGS.breakDuration;
             this.totalTime = POMODORO_SETTINGS.breakDuration;
             alert('Work time complete! Time for a break.');
         } else {
-            // Switch back to work time
             this.isWorkTime = true;
             this.timeRemaining = POMODORO_SETTINGS.workDuration;
             this.totalTime = POMODORO_SETTINGS.workDuration;
@@ -772,21 +733,26 @@ class NotebookApp {
         const minutes = Math.floor(this.timeRemaining / 60);
         const seconds = this.timeRemaining % 60;
         
-        this.timerDisplay.textContent = 
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        if (this.timerDisplay) {
+            this.timerDisplay.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
 
-        // Update status
-        this.timerStatus.textContent = this.isWorkTime ? 'Work Time' : 'Break Time';
+        if (this.timerStatus) {
+            this.timerStatus.textContent = this.isWorkTime ? 'Work Time' : 'Break Time';
+        }
 
-        // Update progress bar
-        const progressPercent = ((this.totalTime - this.timeRemaining) / this.totalTime) * 100;
-        this.timerProgress.style.width = progressPercent + '%';
+        if (this.timerProgress) {
+            const progressPercent = ((this.totalTime - this.timeRemaining) / this.totalTime) * 100;
+            this.timerProgress.style.width = progressPercent + '%';
+        }
 
-        // Change color based on phase
-        if (this.isWorkTime) {
-            this.pomodoroTimerBar.style.background = 'linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%)';
-        } else {
-            this.pomodoroTimerBar.style.background = 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)';
+        if (this.pomodoroTimerBar) {
+            if (this.isWorkTime) {
+                this.pomodoroTimerBar.style.background = 'linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%)';
+            } else {
+                this.pomodoroTimerBar.style.background = 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)';
+            }
         }
     }
 
@@ -799,16 +765,21 @@ class NotebookApp {
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded fired');
-    window.notebookApp = new NotebookApp();
-    console.log('NotebookApp initialized successfully');
+    try {
+        window.notebookApp = new NotebookApp();
+        console.log('NotebookApp initialized successfully');
+    } catch (error) {
+        console.error('Error initializing NotebookApp:', error);
+    }
 });
 
 // Also try window.onload as backup
 window.addEventListener('load', () => {
-    console.log('Window load event fired');
     if (!window.notebookApp) {
-        console.log('App not initialized in DOMContentLoaded, initializing now...');
-        window.notebookApp = new NotebookApp();
+        try {
+            window.notebookApp = new NotebookApp();
+        } catch (error) {
+            console.error('Error initializing NotebookApp on load:', error);
+        }
     }
 });
