@@ -500,7 +500,7 @@ mark {
 
 /* Calendar View */
 .view-container {
-    flex: 1;
+    flex: 4;
     overflow: auto;
     display: none;
     flex-direction: column;
